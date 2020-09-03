@@ -50,14 +50,12 @@ class Game {
 
         //player 1
         if (this.#turn && authorID == this.#player1) {
-            console.log('player1')
             if(typeof this.#gameBoard[key] == 'number'){
                 this.#gameBoard[key]='X';
                 this.#turn = !this.#turn
             }
             //player 2
         } else if (!this.#turn && authorID == this.#player2) {
-            console.log('player2')
             if(typeof this.#gameBoard[key] == 'number'){
                 this.#gameBoard[key]='O';
                 this.#turn = !this.#turn
@@ -78,6 +76,8 @@ class Game {
         this.#player2 = player
         this.#inPlay = true
     }
+    GetPlayer1(){return this.#player1}
+    GetPlayer2(){return this.#player2}
     PrintBoard = () => {
         let Board = `#############
 #    ${this.#gameBoard.TOP_LEFT}    |    ${this.#gameBoard.TOP_MIDDLE}    |    ${this.#gameBoard.TOP_RIGHT}   # 
@@ -89,7 +89,6 @@ class Game {
         return Board
     }
     #GetWinner = () => {
-        console.log('checking for win')
         let winningMoves = [
             'TOP_LEFT TOP_MIDDLE TOP_RIGHT',
             'MIDDLE_LEFT MIDDLE MIDDLE_RIGHT',
@@ -112,7 +111,6 @@ class Game {
                 }
 
                 let currentMove = this.#gameBoard[moves[i]];
-                console.log(`CURRENT MOVE:${currentMove}, PREVIOUS MOVE: ${previousMove}`)
 
                 if (previousMove === currentMove){
                     previousMove = currentMove;
