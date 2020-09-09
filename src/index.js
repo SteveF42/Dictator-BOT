@@ -48,7 +48,7 @@ Bot.on('message', message => {
     const authorID = message.author.id;
 
     //checks if a message in the server started with a command
-    if (message.channel.id === CHANNEL_ID && message.content.startsWith(prefix)) {
+    if (message.content.startsWith(prefix)) {
         //parses the answer
         const [CMD_NAME, ...args] = message.content
             .trim()
@@ -72,6 +72,7 @@ Bot.on('message', message => {
                 message.channel.send(board);
                 
                 let potential_winner = temp_game.TestWinner()
+                let is_tie = temp_game.TestTie()
 
                 //checks if someone has won 
                 if(potential_winner){
@@ -87,7 +88,19 @@ Bot.on('message', message => {
                         delete players[player1]
                         delete players[player2]
                     }).catch(err=>console.log(err))
-                }else{
+                }else if(is_tie){
+                    message.channel.send(`YOU GUYS SUCK! THERE'S A TIE`)
+
+                    let player1 = temp_game.GetPlayer1()
+                    let player2 = temp_game.GetPlayer2()
+
+                    let gameKey = games[players[player1]]
+
+                    delete games[gameKey]
+                    delete players[player1]
+                    delete players[player2]
+                }
+                else{
                     let playerID = temp_game.GetTurn();
                     Bot.users.fetch(playerID).then(username=>{
                         message.channel.send(`${username}, it is your turn!`).catch(err=>console.log(err))

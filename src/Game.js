@@ -125,9 +125,17 @@ class Game {
         }
         return false;
     }
+    TestTie = function(){
+        for(var key in this.#gameBoard){
+            if(!isNaN(this.#gameBoard[key])) return false
+        }
+        return true;
+    }
+
     TestWinner(){
         if(this.#GetWinner())
             return !this.#turn ? this.#player1 : this.#player2;
+        // else if(this.#IsBoardOpen) return "TIE";
         else
             return false
     }
