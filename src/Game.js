@@ -139,6 +139,7 @@ class Game {
         else
             return false
     }
+    InPlay(){return this.#inPlay}
 
 }
 

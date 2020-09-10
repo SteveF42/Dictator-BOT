@@ -36,6 +36,35 @@ const InsertGame = function (authorID, channel) {
 
 }
 
+const leaveGame = function(userID,message){
+    let gameID = players[userID]
+    let game = games[gameID]
+    if(userID in players && game.InPlay()){
+        try{
+            let player1 = game.GetPlayer1()
+            let player2 = game.GetPlayer2()
+
+            Bot.users.fetch(player1).then(username1=>{
+                Bot.users.fetch(player2).then(username2=>{
+                    message.channel.send(`THE MATCH WITH ${username1} AND ${username2} HAS BEEN CANCELLED`)
+                });
+            });
+
+            delete games[gameID]
+            delete players[player1]
+            delete players[player2]
+        }catch{
+            console.log('error')
+        }
+    }
+    else if(userID in players && !game.InPlay()){
+        message.channel.send(`${message.author.username} HAS LEFT THE MATCH!`)
+        delete players[userID]
+        delete games[gameID]
+        gameKey--;
+    }
+}
+
 
 Bot.on('ready', () => {
     console.log(`${Bot.user.username} has logged in!`);
@@ -58,6 +87,9 @@ Bot.on('message', message => {
 
         if (CMD_NAME == "play") {
             InsertGame(authorID, message.channel)
+        }
+        if(CMD_NAME == "leave"){
+            leaveGame(authorID,message)
         }
 
         //checks if someone requested a game and that game is in play
