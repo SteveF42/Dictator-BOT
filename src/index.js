@@ -34,7 +34,7 @@ Bot.on('ready', async () => {
     console.log(potential_dictators)
 });
 
-let timer = setInterval(function(){rotate_dictator()},hour)
+let timer = setInterval(function(){rotate_dictator()},min*30)
 
 async function check_for_dictator(){
     let guild = Bot.guilds.cache.get(Alfies_server_id)
