@@ -26,7 +26,7 @@ Bot.login(Credentials.BOT_TOKEN);
 Bot.on('ready', async () => {
     console.log(`${Bot.user.username} has logged in!`);
     let json = read_file()
-
+    
     //reads all names from file and adds it to the potential dictator list
     for (i in json) {
         potential_dictators.push(json[i])
@@ -46,6 +46,8 @@ async function check_for_dictator(){
 }
 
 async function rotate_dictator() {
+    if(potential_dictators.length === 0)return;
+
     console.log('Rotating Dictator!');
     let valid_dictator = await check_for_dictator()
     const guild = Bot.guilds.cache.get(Alfies_server_id)
@@ -112,6 +114,7 @@ function read_file() {
         }
         return jsonString
     })
+    if(json === null) return 
 
     return JSON.parse(json)
 }
@@ -134,22 +137,29 @@ function add_dictator_to_json(name, id) {
 function remove_dictator_from_json(user_id){
     const json = read_file()
     const member = Bot.guilds.cache.get(Alfies_server_id).members.cache.find(member => member.user.id === user_id)
+    for(x in json){
+        if(x==user_id || json[x]==user_id){
+            delete json[x]
+            break;
+        }
+    }
     
-    delete json[member.user.username]
     console.log(json)
     write_file(json)    
 }
 
 function is_current_dictator(user_id){
+
     const member = Bot.guilds.cache.get(Alfies_server_id).members.cache.get(user_id)
     const member_role = member.roles.cache.find(role => role.name === "Horny Dictator")
-    if(member_role.name === "Horny Dictator"){
+    if(member_role === undefined) return;
+    if(member_role.name == "Horny Dictator"){
         rotate_dictator()
     }
 }
 
 //helper function that inserts data into dictionaries so games can be played between two people
-const InsertGame = function (authorID, channel) {
+function InsertGame(authorID, channel) {
     if (authorID in players) return channel.send("You're already in a game!");
 
     let GameID = Math.round(gameKey / 2);
@@ -173,7 +183,7 @@ const InsertGame = function (authorID, channel) {
 
 }
 
-const leaveGame = function (userID, message) {
+function leaveGame(userID, message) {
     let gameID = players[userID]
     let game = games[gameID]
     if (userID in players && game.InPlay()) {
@@ -251,19 +261,38 @@ Bot.on('message', message => {
         //removes user from json file
         if(CMD_NAME == "remove_user"){
             let user_to_be_removed = other[0].slice(3,-1)
-            if(user_to_be_removed==null) return;
-
-            remove_dictator_from_json(user_to_be_removed)
-
-            let index = potential_dictators.indexOf(user_to_be_removed)
-            if (index > -1) {
-                potential_dictators.splice(index, 1);
+            let found = potential_dictators.find(x => x === user_to_be_removed)
+            if(user_to_be_removed==null || !found) {
+                message.channel.send("Nope");
+                return;
             }
-            console.log(`Userkey removed <@${user_to_be_removed}>, potential dictators updated: `,potential_dictators)
-            message.channel.send(`<@${user_to_be_removed}> has been removed from the becoming a dictator`)
+
             // if a dictator tries to be malicious by removing their name it'll take away their role
+            let potential_dictator = message.guild.members.cache.get(user_to_be_removed).roles.cache.find(role => role.name === 'Horny Dictator')
             if(message.author.id === user_to_be_removed){
+                //literally the only thing different here
                 is_current_dictator(user_to_be_removed)
+                
+                //REPEATED CODE IS FUN
+                let index = potential_dictators.indexOf(user_to_be_removed)
+                if (index > -1) {
+                    potential_dictators.splice(index, 1);
+                }
+                console.log(`Userkey removed <@${user_to_be_removed}>, potential dictators updated: `,potential_dictators)
+                message.channel.send(`<@${user_to_be_removed}> has been removed from the becoming a dictator`)
+                remove_dictator_from_json(user_to_be_removed)
+            }
+            else if(message.author.id != user_to_be_removed && potential_dictator.name !== 'Horny Dictator'){
+                //YAYAYAYAYAYAYAYAYAY
+                let index = potential_dictators.indexOf(user_to_be_removed)
+                if (index > -1) {
+                    potential_dictators.splice(index, 1);
+                }
+                console.log(`Userkey removed <@${user_to_be_removed}>, potential dictators updated: `,potential_dictators)
+                message.channel.send(`<@${user_to_be_removed}> has been removed from the becoming a dictator`)
+                remove_dictator_from_json(user_to_be_removed)
+            }else{
+                message.channel.send("Cannot remove user, they are currently dictator")
             }
         }
 
