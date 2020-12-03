@@ -66,7 +66,7 @@ async function rotate_dictator() {
 
             //sends a message saying whos getting de throned 
             let channel = guild.channels.cache.find(channel => channel.name === 'ticy-toe');
-            // dictator_list.forEach(id=> {channel.send(`<${id}> HAS BEEN DE-THRONED`)});
+            dictator_list.forEach(id=> {channel.send(`<${id}> HAS BEEN DE-THRONED`)});
             console.log(members.get(previous_dictator).user.username + " Has been de throned")
             
             
@@ -81,7 +81,7 @@ async function rotate_dictator() {
                 const member = guild.members.cache.get(new_dictator)
 
                 member.roles.add(dictator_role_id)
-                // channel.send(`<${new_dictator}> IS CROWNED`)
+                channel.send(`<${new_dictator}> IS CROWNED`)
                 console.log(members.get(new_dictator).user.username + " Has been CROWNED")
 
                 break;
