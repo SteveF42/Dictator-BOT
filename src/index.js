@@ -259,6 +259,7 @@ Bot.on('message', message => {
             let user_id = message.author.id
             if (user_id == server_owner) {
                 rotate_dictator()
+		timer.refresh()
             } else {
                 message.channel.send('Only the server owner can manually rotate Dictators!')
             }
