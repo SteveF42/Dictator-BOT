@@ -39,8 +39,7 @@ let timer = setInterval(function(){rotate_dictator()},hour)
 function check_for_dictator(){
     let guild = Bot.guilds.cache.get(Alfies_server_id)
     //filters through each member and finds each member with a dictator tag
-    const dictator_role_id = guild.roles.cache.find(role => role.name == "Horny Dictator")
-    const members = guild.members.cache.filter(member => member.roles.cache.find(role => role.name == dictator_role_id.name)).map(member => member.user.id);
+    const members = guild.members.cache.filter(member => member.roles.cache.find(role => role.name == "Horny Dictator")).map(member => member.user.id);
     console.log(members)
     if(members.length >= 1) return true
     return false;
@@ -49,6 +48,7 @@ function check_for_dictator(){
 async function rotate_dictator() {
     console.log('Rotating Dictator!');
     let valid_dictator = await check_for_dictator()
+    let channel = guild.channels.cache.find(channel => channel.name === 'ticy-toe');
     const guild = Bot.guilds.cache.get(Alfies_server_id)
 
     if (valid_dictator) {
@@ -67,6 +67,7 @@ async function rotate_dictator() {
             //sends a message saying whos getting de throned 
             let channel = guild.channels.cache.find(channel => channel.name === 'ticy-toe');
             dictator_list.forEach(id=> {channel.send(`<${id}> HAS BEEN DE-THRONED`)});
+            dictator_list.forEach(id=> {channel.send(`<@${id}> HAS BEEN DE-THRONED`)});
             console.log(members.get(previous_dictator).user.username + " Has been de throned")
             
             
@@ -75,7 +76,6 @@ async function rotate_dictator() {
                 //gets a random person from the list of potential dictators
                 const randInt = Math.floor(Math.random() * Math.floor(potential_dictators.length));
                 const new_dictator = potential_dictators[randInt];
-                console.log('hello')
                 
                 if(new_dictator===previous_dictator) continue;
                 const member = guild.members.cache.get(new_dictator)
@@ -94,6 +94,7 @@ async function rotate_dictator() {
         
         let member = Bot.guilds.cache.get(Alfies_server_id).members.cache.get(new_dictator)
 
+	channel.send(`No Dictators were found, <@${new_dictator} is crowned>`)
         console.log(`No current Dictator found, ${member.user.username} is crowned dictator`)
         const dictator_role_id = guild.roles.cache.find(role => role.name == "Horny Dictator");
 
