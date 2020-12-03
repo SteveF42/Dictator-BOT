@@ -48,8 +48,8 @@ function check_for_dictator(){
 async function rotate_dictator() {
     console.log('Rotating Dictator!');
     let valid_dictator = await check_for_dictator()
-    let channel = guild.channels.cache.find(channel => channel.name === 'ticy-toe');
     const guild = Bot.guilds.cache.get(Alfies_server_id)
+    let channel = guild.channels.cache.find(channel => channel.name === 'ticy-toe');
 
     if (valid_dictator) {
             //filters through each member and finds each member with a dictator tag
