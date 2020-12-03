@@ -73,7 +73,7 @@ async function rotate_dictator() {
             
             
             //finds user and crowns them the new dictator
-            while(true){
+            while(true && potential_dictators.length > 1){
                 //gets a random person from the list of potential dictators
                 const randInt = Math.floor(Math.random() * Math.floor(potential_dictators.length));
                 const new_dictator = potential_dictators[randInt];
@@ -259,7 +259,11 @@ Bot.on('message', message => {
             let user_id = message.author.id
             if (user_id == server_owner) {
                 rotate_dictator()
+<<<<<<< HEAD
 		timer.refresh()
+=======
+                timer.refresh()
+>>>>>>> 1daf248bbda0a1c7555c141c0a60571b8e502068
             } else {
                 message.channel.send('Only the server owner can manually rotate Dictators!')
             }
