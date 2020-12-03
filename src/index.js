@@ -46,7 +46,7 @@ async function check_for_dictator(){
 }
 
 async function rotate_dictator() {
-    if(potential_dictators.length === 0)return;
+    if(potential_dictators.length <= 1) return;
 
     console.log('Rotating Dictator!');
     let valid_dictator = await check_for_dictator()
@@ -96,7 +96,7 @@ async function rotate_dictator() {
         let member = Bot.guilds.cache.get(Alfies_server_id).members.cache.get(new_dictator)
 
 	    channel.send(`No Dictators were found, <@${new_dictator} is crowned>`)
-        console.log(`No current Dictator found, ${member.user.username} is crowned dictator`)
+        console.log(`No current Dictator found, <@${member.user.username}> is crowned dictator`)
         const dictator_role_id = guild.roles.cache.find(role => role.name == "Horny Dictator");
 
         member.roles.add(dictator_role_id)
@@ -259,11 +259,7 @@ Bot.on('message', message => {
             let user_id = message.author.id
             if (user_id == server_owner) {
                 rotate_dictator()
-<<<<<<< HEAD
-		timer.refresh()
-=======
                 timer.refresh()
->>>>>>> 1daf248bbda0a1c7555c141c0a60571b8e502068
             } else {
                 message.channel.send('Only the server owner can manually rotate Dictators!')
             }
