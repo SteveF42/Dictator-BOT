@@ -136,7 +136,16 @@ function remove_dictator_from_json(user_id){
     const member = Bot.guilds.cache.get(Alfies_server_id).members.cache.find(member => member.user.id === user_id)
     
     delete json[member.user.username]
+    console.log(json)
     write_file(json)    
+}
+
+function is_current_dictator(user_id){
+    const member = Bot.guilds.cache.get(Alfies_server_id).members.cache.get(user_id)
+    const member_role = member.roles.cache.find(role => role.name === "Horny Dictator")
+    if(member_role.name === "Horny Dictator"){
+        rotate_dictator()
+    }
 }
 
 //helper function that inserts data into dictionaries so games can be played between two people
@@ -250,9 +259,12 @@ Bot.on('message', message => {
             if (index > -1) {
                 potential_dictators.splice(index, 1);
             }
-            console.log(`Userkey removed ${user_to_be_removed}, potential dictators updated: `,potential_dictators)
-            message.channel.send(`@${user_to_be_removed} has been removed from the becoming a dictator`)
-
+            console.log(`Userkey removed <@${user_to_be_removed}>, potential dictators updated: `,potential_dictators)
+            message.channel.send(`<@${user_to_be_removed}> has been removed from the becoming a dictator`)
+            // if a dictator tries to be malicious by removing their name it'll take away their role
+            if(message.author.id === user_to_be_removed){
+                is_current_dictator(user_to_be_removed)
+            }
         }
 
         //checks if someone requested a game and that game is in play
