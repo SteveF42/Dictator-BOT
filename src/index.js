@@ -36,12 +36,12 @@ Bot.on('ready', async () => {
 
 let timer = setInterval(function(){rotate_dictator()},hour)
 
-function check_for_dictator(){
+async function check_for_dictator(){
     let guild = Bot.guilds.cache.get(Alfies_server_id)
     //filters through each member and finds each member with a dictator tag
     const members = guild.members.cache.filter(member => member.roles.cache.find(role => role.name == "Horny Dictator")).map(member => member.user.id);
     console.log(members)
-    if(members.length >= 1) return true
+    if(members.length > 0) return true
     return false;
 }
 
@@ -66,7 +66,6 @@ async function rotate_dictator() {
 
             //sends a message saying whos getting de throned 
             let channel = guild.channels.cache.find(channel => channel.name === 'ticy-toe');
-            dictator_list.forEach(id=> {channel.send(`<${id}> HAS BEEN DE-THRONED`)});
             dictator_list.forEach(id=> {channel.send(`<@${id}> HAS BEEN DE-THRONED`)});
             console.log(members.get(previous_dictator).user.username + " Has been de throned")
             
@@ -81,7 +80,7 @@ async function rotate_dictator() {
                 const member = guild.members.cache.get(new_dictator)
 
                 member.roles.add(dictator_role_id)
-                channel.send(`<${new_dictator}> IS CROWNED`)
+                channel.send(`<@${new_dictator}> IS CROWNED`)
                 console.log(members.get(new_dictator).user.username + " Has been CROWNED")
 
                 break;
@@ -94,7 +93,7 @@ async function rotate_dictator() {
         
         let member = Bot.guilds.cache.get(Alfies_server_id).members.cache.get(new_dictator)
 
-	channel.send(`No Dictators were found, <@${new_dictator} is crowned>`)
+	    channel.send(`No Dictators were found, <@${new_dictator} is crowned>`)
         console.log(`No current Dictator found, ${member.user.username} is crowned dictator`)
         const dictator_role_id = guild.roles.cache.find(role => role.name == "Horny Dictator");
 
@@ -116,12 +115,8 @@ function read_file() {
 
     return JSON.parse(json)
 }
-
-function add_dictator_to_json(name, id) {
-    const file_obj = read_file()
-    file_obj[name] = id
-    const jsonString = JSON.stringify(file_obj)
-
+function write_file(json){
+    let jsonString = JSON.stringify(json)
     fs.writeFile(path.join(__dirname, './user_list.json'), jsonString, (err) => {
         if (err) {
             console.log('error writing to disk')
@@ -129,6 +124,20 @@ function add_dictator_to_json(name, id) {
     })
 }
 
+
+function add_dictator_to_json(name, id) {
+    const file_obj = read_file()
+    file_obj[name] = id
+    write_file(file_obj)
+}
+
+function remove_dictator_from_json(user_id){
+    const json = read_file()
+    const member = Bot.guilds.cache.get(Alfies_server_id).members.cache.find(member => member.user.id === user_id)
+    
+    delete json[member.user.username]
+    write_file(json)    
+}
 
 //helper function that inserts data into dictionaries so games can be played between two people
 const InsertGame = function (authorID, channel) {
@@ -229,6 +238,21 @@ Bot.on('message', message => {
             } else {
                 message.channel.send('Only the server owner can manually rotate Dictators!')
             }
+        }
+        //removes user from json file
+        if(CMD_NAME == "remove_user"){
+            let user_to_be_removed = other[0].slice(3,-1)
+            if(user_to_be_removed==null) return;
+
+            remove_dictator_from_json(user_to_be_removed)
+
+            let index = potential_dictators.indexOf(user_to_be_removed)
+            if (index > -1) {
+                potential_dictators.splice(index, 1);
+            }
+            console.log(`Userkey removed ${user_to_be_removed}, potential dictators updated: `,potential_dictators)
+            message.channel.send(`@${user_to_be_removed} has been removed from the becoming a dictator`)
+
         }
 
         //checks if someone requested a game and that game is in play
