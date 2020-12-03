@@ -130,7 +130,12 @@ function write_file(json){
 
 function add_dictator_to_json(name, id) {
     const file_obj = read_file()
+    for(x in file_obj){
+        if (x == name || id) return;
+        if(file_ob[x] == name || id) return;
+    }
     file_obj[name] = id
+    
     write_file(file_obj)
 }
 
