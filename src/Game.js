@@ -97,7 +97,7 @@ class Game {
             'TOP_MIDDLE MIDDLE BOTTOM_MIDDLE',
             'TOP_RIGHT MIDDLE_RIGHT BOTTOM_RIGHT',
             'TOP_LEFT MIDDLE BOTTOM_RIGHT',
-            'TOP_RIGHT MIDDLE BOTTOM_LEFT7'
+            'TOP_RIGHT MIDDLE BOTTOM_LEFT'
         ]
         let won = false
         for(let i = 0; i < winningMoves.length;i++){
