@@ -13,6 +13,8 @@ const Bot = new Client({disableMentions : "none"});
 const prefix = '!';
 const CHANNEL_ID = '650870669281591355';
 const Alfies_server_id = '741527362960883724';
+const DICTATOR_NAME = 'Horny Dictator'
+const DICTATOR_CHANNEL = 'ticy-toe'
 var games = {}
 var players = {}
 
@@ -39,7 +41,7 @@ let timer = setInterval(function(){rotate_dictator()},day)
 async function check_for_dictator(){
     let guild = Bot.guilds.cache.get(Alfies_server_id)
     //filters through each member and finds each member with a dictator tag
-    const members = guild.members.cache.filter(member => member.roles.cache.find(role => role.name == "Horny Dictator")).map(member => member.user.id);
+    const members = guild.members.cache.filter(member => member.roles.cache.find(role => role.name == DICTATOR_NAME)).map(member => member.user.id);
     console.log(members)
     if(members.length > 0) return true
     return false;
@@ -47,7 +49,7 @@ async function check_for_dictator(){
 
 async function rotate_dictator() {
     const guild = Bot.guilds.cache.get(Alfies_server_id)
-    let channel = guild.channels.cache.find(channel => channel.name === 'ticy-toe');
+    let channel = guild.channels.cache.find(channel => channel.name === DICTATOR_CHANNEL);
     if(potential_dictators.length <= 1){
         channel.send("Hmm, no one else is available.")
         return;
@@ -59,10 +61,10 @@ async function rotate_dictator() {
     if (valid_dictator) {
             //filters through each member and finds each member with a dictator tag
             const members = guild.members.cache;
-            const dictator_role_id = guild.roles.cache.find(role => role.name == "Horny Dictator");
+            const dictator_role_id = guild.roles.cache.find(role => role.name == DICTATOR_NAME);
             const dictator_list = members
                     .filter(member => member.roles.cache
-                    .find(role => role.name === "Horny Dictator"))
+                    .find(role => role.name === DICTATOR_NAME))
                     .map(member=>member.user.id)
 
             //removes the dictator roll
@@ -70,7 +72,7 @@ async function rotate_dictator() {
             members.forEach(dictator => dictator.roles.remove(dictator_role_id));
 
             //sends a message saying whos getting de throned 
-            let channel = guild.channels.cache.find(channel => channel.name === 'ticy-toe');
+            let channel = guild.channels.cache.find(channel => channel.name === DICTATOR_CHANNEL);
             dictator_list.forEach(id=> {channel.send(`<@${id}> HAS BEEN DE-THRONED`)});
             console.log(members.get(previous_dictator).user.username + " Has been de throned")
             
@@ -100,7 +102,7 @@ async function rotate_dictator() {
 
 	    channel.send(`No Dictators were found, <@${new_dictator} is crowned>`)
         console.log(`No current Dictator found, <@${member.user.username}> is crowned dictator`)
-        const dictator_role_id = guild.roles.cache.find(role => role.name == "Horny Dictator");
+        const dictator_role_id = guild.roles.cache.find(role => role.name == DICTATOR_NAME);
 
         member.roles.add(dictator_role_id)
         
@@ -157,9 +159,9 @@ function remove_dictator_from_json(user_id){
 function is_current_dictator(user_id){
 
     const member = Bot.guilds.cache.get(Alfies_server_id).members.cache.get(user_id)
-    const member_role = member.roles.cache.find(role => role.name === "Horny Dictator")
+    const member_role = member.roles.cache.find(role => role.name === DICTATOR_NAME)
     if(member_role === undefined) return;
-    if(member_role.name == "Horny Dictator"){
+    if(member_role.name == DICTATOR_NAME){
         rotate_dictator()
     }
 }
@@ -275,7 +277,7 @@ Bot.on('message', message => {
             }
 
             // if a dictator tries to be malicious by removing their name it'll take away their role
-            let potential_dictator = message.guild.members.cache.get(user_to_be_removed).roles.cache.find(role => role.name === 'Horny Dictator')
+            let potential_dictator = message.guild.members.cache.get(user_to_be_removed).roles.cache.find(role => role.name === 'DICTATOR_NAME')
             if(message.author.id === user_to_be_removed){
                 //literally the only thing different here
                 is_current_dictator(user_to_be_removed)
@@ -289,7 +291,7 @@ Bot.on('message', message => {
                 message.channel.send(`<@${user_to_be_removed}> has been removed from the becoming a dictator`)
                 remove_dictator_from_json(user_to_be_removed)
             }
-            else if(message.author.id != user_to_be_removed && potential_dictator.name !== 'Horny Dictator'){
+            else if(message.author.id != user_to_be_removed && potential_dictator.name !== 'DICTATOR_NAME'){
                 //YAYAYAYAYAYAYAYAYAY
                 let index = potential_dictators.indexOf(user_to_be_removed)
                 if (index > -1) {
@@ -311,7 +313,7 @@ Bot.on('message', message => {
                 for(let i = 0; i < potential_dictators.length;i++){
                     const member = message.guild.members.cache.get(potential_dictators[i])
                     let is_dictator = ''
-                    if(member.roles.cache.find(role => role.name == 'Horny Dictator')){
+                    if(member.roles.cache.find(role => role.name == 'DICTATOR_NAME')){
                         is_dictator = " <---- Dictator"
                     }
                     embed_msg.push(member.nickname + is_dictator)
