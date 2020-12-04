@@ -46,6 +46,7 @@ async function check_for_dictator(){
 }
 
 async function rotate_dictator() {
+    const guild = Bot.guilds.cache.get(Alfies_server_id)
     let channel = guild.channels.cache.find(channel => channel.name === 'ticy-toe');
     if(potential_dictators.length <= 1){
         channel.send("Hmm, no one else is available.")
@@ -54,7 +55,6 @@ async function rotate_dictator() {
 
     console.log('Rotating Dictator!');
     let valid_dictator = await check_for_dictator()
-    const guild = Bot.guilds.cache.get(Alfies_server_id)
 
     if (valid_dictator) {
             //filters through each member and finds each member with a dictator tag
