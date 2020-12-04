@@ -1,4 +1,4 @@
-const { Client, Message } = require('discord.js')
+const { Client, MessageEmbed } = require('discord.js')
 const Credentials = require('../Credentials.json')
 const TicTacToe = require('./Game').Game
 const fs = require('fs')
@@ -300,6 +300,29 @@ Bot.on('message', message => {
                 remove_dictator_from_json(user_to_be_removed)
             }else{
                 message.channel.send("Cannot remove user, they are currently dictator")
+            }
+        }
+
+        if(CMD_NAME == "get"){
+            const second_cmd = other.join(' ')
+            console.log(second_cmd)
+            if(second_cmd == "dictator pool"){
+                const embed_msg = []
+                for(let i = 0; i < potential_dictators.length;i++){
+                    const member = message.guild.members.cache.get(potential_dictators[i])
+                    let is_dictator = ''
+                    if(member.roles.cache.find(role => role.name == 'Horny Dictator')){
+                        is_dictator = " <---- Dictator"
+                    }
+                    embed_msg.push(member.nickname + is_dictator)
+                }
+
+                const embed = new MessageEmbed()
+                    .setTitle('All Possible Dictators')
+                    .setColor('#2a80f7')
+                    .setDescription(embed_msg.join('\n\n'))
+                message.channel.send(embed)
+
             }
         }
 
