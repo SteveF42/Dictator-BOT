@@ -34,7 +34,7 @@ Bot.on('ready', async () => {
     console.log(potential_dictators)
 });
 
-let timer = setInterval(function(){rotate_dictator()},min*30)
+let timer = setInterval(function(){rotate_dictator()},day)
 
 async function check_for_dictator(){
     let guild = Bot.guilds.cache.get(Alfies_server_id)
@@ -46,6 +46,7 @@ async function check_for_dictator(){
 }
 
 async function rotate_dictator() {
+    const guild = Bot.guilds.cache.get(Alfies_server_id)
     let channel = guild.channels.cache.find(channel => channel.name === 'ticy-toe');
     if(potential_dictators.length <= 1){
         channel.send("Hmm, no one else is available.")
@@ -54,7 +55,6 @@ async function rotate_dictator() {
 
     console.log('Rotating Dictator!');
     let valid_dictator = await check_for_dictator()
-    const guild = Bot.guilds.cache.get(Alfies_server_id)
 
     if (valid_dictator) {
             //filters through each member and finds each member with a dictator tag
@@ -117,7 +117,6 @@ function read_file() {
         }
         return jsonString
     })
-    if(json === null) return 
 
     return JSON.parse(json)
 }
@@ -134,8 +133,7 @@ function write_file(json){
 function add_dictator_to_json(name, id) {
     const file_obj = read_file()
     for(x in file_obj){
-        if (x == name || id) return;
-        if(file_ob[x] == name || id) return;
+        if (x==id || file_obj[x] == id) return;
     }
     file_obj[name] = id
     
