@@ -314,7 +314,7 @@ Bot.on('message', message => {
                 for(let i = 0; i < potential_dictators.length;i++){
                     const member = message.guild.members.cache.get(potential_dictators[i])
                     let is_dictator = ''
-                    if(member.roles.cache.find(role => role.name == 'DICTATOR_NAME')){
+                    if(member.roles.cache.find(role => role.name == DICTATOR_NAME)){
                         is_dictator = " <---- Dictator"
                     }
                     embed_msg.push((member.nickname || member.user.username) + is_dictator)
