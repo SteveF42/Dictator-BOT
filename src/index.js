@@ -277,7 +277,7 @@ Bot.on('message', message => {
             }
 
             // if a dictator tries to be malicious by removing their name it'll take away their role
-            let potential_dictator = message.guild.members.cache.get(user_to_be_removed).roles.cache.find(role => role.name === 'DICTATOR_NAME')
+            const potential_dictator_role = message.guild.members.cache.get(user_to_be_removed).roles.cache.find(role => role.name === 'DICTATOR_NAME')
             if(message.author.id === user_to_be_removed){
                 //literally the only thing different here
                 is_current_dictator(user_to_be_removed)
@@ -291,7 +291,7 @@ Bot.on('message', message => {
                 message.channel.send(`<@${user_to_be_removed}> has been removed from the becoming a dictator`)
                 remove_dictator_from_json(user_to_be_removed)
             }
-            else if(message.author.id != user_to_be_removed && potential_dictator.name !== 'DICTATOR_NAME'){
+            else if(message.author.id != user_to_be_removed && potential_dictator_role != undefined){
                 //YAYAYAYAYAYAYAYAYAY
                 let index = potential_dictators.indexOf(user_to_be_removed)
                 if (index > -1) {
@@ -316,7 +316,7 @@ Bot.on('message', message => {
                     if(member.roles.cache.find(role => role.name == 'DICTATOR_NAME')){
                         is_dictator = " <---- Dictator"
                     }
-                    embed_msg.push(member.nickname + is_dictator)
+                    embed_msg.push((member.nickname || member.user.username) + is_dictator)
                 }
 
                 const embed = new MessageEmbed()
