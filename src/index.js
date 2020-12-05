@@ -272,6 +272,7 @@ Bot.on('message', message => {
             let user_to_be_removed = other[0].slice(3,-1)
             let found = potential_dictators.find(x => x === user_to_be_removed)
             if(user_to_be_removed==null || !found) {
+
                 message.channel.send("Nope");
                 return;
             }
@@ -291,7 +292,7 @@ Bot.on('message', message => {
                 message.channel.send(`<@${user_to_be_removed}> has been removed from the becoming a dictator`)
                 remove_dictator_from_json(user_to_be_removed)
             }
-            else if(message.author.id != user_to_be_removed && potential_dictator_role != undefined){
+            else if(message.author.id != user_to_be_removed && potential_dictator_role === undefined){
                 //YAYAYAYAYAYAYAYAYAY
                 let index = potential_dictators.indexOf(user_to_be_removed)
                 if (index > -1) {
