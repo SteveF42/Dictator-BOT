@@ -280,10 +280,14 @@ Bot.on('message', message => {
             // if a dictator tries to be malicious by removing their name it'll take away their role
             const potential_dictator_role = message.guild.members.cache.get(user_to_be_removed).roles.cache.find(role => role.name === DICTATOR_NAME)
 
-            if((message.author.id != user_to_be_removed && potential_dictator_role === undefined) || message.author.id === user_to_be_removed){
-                //YAYAYAYAYAYAYAYAYAY
-                is_current_dictator(user_to_be_removed)
+            if(potential_dictator_role === undefined || message.author.id === user_to_be_removed){
+                //checks if the user is trying to remove themselves from the dictator list 
+                if(message.author.id === user_to_be_removed){
+                    console.log('YES IT WOULD ROTATE HERE')
+                    // is_current_dictator(message.author.id)
+                }
 
+                //removes person from dictator pool and save file
                 let index = potential_dictators.indexOf(user_to_be_removed)
                 if (index > -1) {
                     potential_dictators.splice(index, 1);
