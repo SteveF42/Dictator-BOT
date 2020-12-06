@@ -38,6 +38,7 @@ Bot.on('ready', async () => {
 
 let timer = setInterval(function(){rotate_dictator()},day)
 
+
 async function check_for_dictator(){
     let guild = Bot.guilds.cache.get(Alfies_server_id)
     //filters through each member and finds each member with a dictator tag
@@ -100,7 +101,7 @@ async function rotate_dictator() {
         
         let member = Bot.guilds.cache.get(Alfies_server_id).members.cache.get(new_dictator)
 
-	    channel.send(`No Dictators were found, <@${new_dictator} is crowned>`)
+	    // channel.send(`No Dictators were found, <@${new_dictator} is crowned>`)
         console.log(`No current Dictator found, <@${member.user.username}> is crowned dictator`)
         const dictator_role_id = guild.roles.cache.find(role => role.name == DICTATOR_NAME);
 
@@ -271,29 +272,18 @@ Bot.on('message', message => {
         if(CMD_NAME == "remove_user"){
             let user_to_be_removed = other[0].slice(3,-1)
             let found = potential_dictators.find(x => x === user_to_be_removed)
-            if(user_to_be_removed==null || !found) {
-
+            if(user_to_be_removed==undefined || !found) {
                 message.channel.send("Nope");
                 return;
             }
 
             // if a dictator tries to be malicious by removing their name it'll take away their role
             const potential_dictator_role = message.guild.members.cache.get(user_to_be_removed).roles.cache.find(role => role.name === DICTATOR_NAME)
-            if(message.author.id === user_to_be_removed){
-                //literally the only thing different here
-                is_current_dictator(user_to_be_removed)
-                
-                //REPEATED CODE IS FUN
-                let index = potential_dictators.indexOf(user_to_be_removed)
-                if (index > -1) {
-                    potential_dictators.splice(index, 1);
-                }
-                console.log(`Userkey removed <@${user_to_be_removed}>, potential dictators updated: `,potential_dictators)
-                message.channel.send(`<@${user_to_be_removed}> has been removed from the becoming a dictator`)
-                remove_dictator_from_json(user_to_be_removed)
-            }
-            else if(message.author.id != user_to_be_removed && potential_dictator_role === undefined){
+
+            if((message.author.id != user_to_be_removed && potential_dictator_role === undefined) || message.author.id === user_to_be_removed){
                 //YAYAYAYAYAYAYAYAYAY
+                is_current_dictator(user_to_be_removed)
+
                 let index = potential_dictators.indexOf(user_to_be_removed)
                 if (index > -1) {
                     potential_dictators.splice(index, 1);
@@ -315,11 +305,12 @@ Bot.on('message', message => {
                     const member = message.guild.members.cache.get(potential_dictators[i])
                     let is_dictator = ''
                     if(member.roles.cache.find(role => role.name == DICTATOR_NAME)){
-                        is_dictator = " <----- Dumbass"
+                        is_dictator = " <---- Dumbass"
                     }
                     embed_msg.push((member.nickname || member.user.username) + is_dictator)
                 }
 
+                // sends an embeded message with all the names currently in the dictator pool
                 const embed = new MessageEmbed()
                     .setTitle('All Possible Dictators')
                     .setColor('#2a80f7')
@@ -386,3 +377,8 @@ Bot.on('message', message => {
 })
 
 
+// setTimeout(dictator_rotator(),day_in_ms*2)
+Bot.on('messageReactionAdd', Reaction => {
+    console.log(Reaction.emoji.name)
+
+})
