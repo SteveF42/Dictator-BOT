@@ -13,7 +13,7 @@ const Bot = new Client({disableMentions : "none"});
 const prefix = '!';
 const CHANNEL_ID = '650870669281591355';
 const Alfies_server_id = '741527362960883724';
-const DICTATOR_NAME = 'Horny Dictator'
+const DICTATOR_NAME = 'Dictator'
 const DICTATOR_CHANNEL = 'ticy-toe'
 var games = {}
 var players = {}
@@ -278,7 +278,7 @@ Bot.on('message', message => {
             }
 
             // if a dictator tries to be malicious by removing their name it'll take away their role
-            const potential_dictator_role = message.guild.members.cache.get(user_to_be_removed).roles.cache.find(role => role.name === 'DICTATOR_NAME')
+            const potential_dictator_role = message.guild.members.cache.get(user_to_be_removed).roles.cache.find(role => role.name === DICTATOR_NAME)
             if(message.author.id === user_to_be_removed){
                 //literally the only thing different here
                 is_current_dictator(user_to_be_removed)
@@ -315,7 +315,7 @@ Bot.on('message', message => {
                     const member = message.guild.members.cache.get(potential_dictators[i])
                     let is_dictator = ''
                     if(member.roles.cache.find(role => role.name == DICTATOR_NAME)){
-                        is_dictator = " <---- Dictator"
+                        is_dictator = " <----- Dumbass"
                     }
                     embed_msg.push((member.nickname || member.user.username) + is_dictator)
                 }
@@ -386,8 +386,3 @@ Bot.on('message', message => {
 })
 
 
-// setTimeout(dictator_rotator(),day_in_ms*2)
-Bot.on('messageReactionAdd', Reaction => {
-    console.log(Reaction.emoji.name)
-
-})
