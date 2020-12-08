@@ -79,9 +79,9 @@ async function rotate_dictator() {
             
             
             //finds user and crowns them the new dictator
-            while(true && potential_dictators.length > 1){
+            while(true){
                 //gets a random person from the list of potential dictators
-                const randInt = Math.floor(Math.random() * Math.floor(potential_dictators.length));
+                const randInt = Math.floor(Math.random() * potential_dictators.length);
                 const new_dictator = potential_dictators[randInt];
                 
                 if(new_dictator===previous_dictator) continue;
