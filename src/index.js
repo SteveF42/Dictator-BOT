@@ -44,7 +44,7 @@ setInterval(()=>{
     const hour = date.getHours();
     const current_day = date.getDay();
 
-    if(hour == 0 && !rotated_today){
+    if(hour == 24 && !rotated_today){
         rotate_dictator();
         rotated_today = true;
     }
