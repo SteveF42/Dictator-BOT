@@ -35,7 +35,7 @@ Bot.on('ready', async () => {
         potential_dictators.push(json[i])
     }
     console.log(potential_dictators)
-}).catch(err => console.log(err));
+})
 
 //every minute it'll check the hour
 let rotated_today = false;
