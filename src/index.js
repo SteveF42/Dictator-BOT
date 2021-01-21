@@ -5,7 +5,8 @@ const fs = require('fs')
 const user_list = require('./user_list.json')
 const path = require('path')
 
-const min = 1000 * 60
+const second = 1000
+const min = second * 60
 const hour = min * 60
 const day = hour * 24
 
@@ -19,12 +20,12 @@ var games = {}
 var players = {}
 
 const potential_dictators = []
-
+const date = new Date();
 
 var gameKey = -1;
 Bot.login(Credentials.BOT_TOKEN);
 
-
+//checks if bot has logged in successfully
 Bot.on('ready', async () => {
     console.log(`${Bot.user.username} has logged in!`);
     let json = read_file()
@@ -36,9 +37,27 @@ Bot.on('ready', async () => {
     console.log(potential_dictators)
 });
 
-let timer = setInterval(function(){rotate_dictator()},day)
+//every minute it'll check the hour
+let rotated_today = false;
+let previous_day = date.getDay();
+setInterval(()=>{
+    const hour = date.getHours();
+    const current_day = date.getDay();
 
+    if(hour == 0 && !rotated_today){
+        rotate_dictator();
+        rotated_today = true;
+    }
+    if(previous_day != current_day && hour != 0){
+        previous_day = current_day;
+        rotated_today = false;
+    }
 
+},min);
+
+// let timer = setInterval(function(){rotate_dictator()},day)
+
+//checks if there are any active dictators
 async function check_for_dictator(){
     let guild = Bot.guilds.cache.get(Alfies_server_id)
     //filters through each member and finds each member with a dictator tag
@@ -48,6 +67,7 @@ async function check_for_dictator(){
     return false;
 }
 
+//rotates dictators onces called 
 async function rotate_dictator() {
     const guild = Bot.guilds.cache.get(Alfies_server_id)
     let channel = guild.channels.cache.find(channel => channel.name === DICTATOR_CHANNEL);
@@ -263,7 +283,7 @@ Bot.on('message', message => {
             let user_id = message.author.id
             if (user_id == server_owner) {
                 rotate_dictator()
-                timer.refresh()
+                // timer.refresh()
             } else {
                 message.channel.send('Only the server owner can manually rotate Dictators!')
             }
