@@ -48,7 +48,7 @@ setInterval(()=>{
         rotate_dictator();
         rotated_today = true;
     }
-    if(previous_day != current_day && hour != 0){
+    if(previous_day != current_day && hour != 24){
         previous_day = current_day;
         rotated_today = false;
     }
