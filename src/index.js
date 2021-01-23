@@ -43,13 +43,18 @@ let previous_day = date.getDay();
 setInterval(()=>{
     const hour = date.getHours();
     const current_day = date.getDay();
+    if(hour == 0 && !rotated_today){
+        console.log("AVAILABLE ROTATION!");
+    }
 
     if(rotated_today && previous_day != current_day){
+        console.log('new day');
         previous_day = current_day;
         rotated_today = false;
     }
 
-    if(hour == 23 && !rotated_today){
+    if(hour == 0 && !rotated_today){
+        console.log('rotating dictator')
         rotate_dictator();
         rotated_today = true;
     }
