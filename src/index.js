@@ -39,18 +39,12 @@ Bot.on('ready', async () => {
 
 //every minute it'll check the hour
 let rotated_today = false;
-let previous_day = date.getDay();
 setInterval(()=>{
     const hour = date.getHours();
-    const current_day = date.getDay();
-    if(hour == 0 && !rotated_today){
+    console.log(hour)
+    if(hour == 1 && rotated_today){
         console.log("AVAILABLE ROTATION!");
-    }
-
-    if(rotated_today && previous_day != current_day){
-        console.log('new day');
-        previous_day = current_day;
-        rotated_today = false;
+        rotated=false;
     }
 
     if(hour == 0 && !rotated_today){
