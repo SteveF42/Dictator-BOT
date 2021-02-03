@@ -44,15 +44,15 @@ Bot.on('ready', async () => {
 let rotated_today = false;
 setInterval(() => {
     const hour = date.getHours();
-    if (hour == 1 && rotated_today) {
+    if (hour == 1) {
         console.log("AVAILABLE ROTATION!");
-        rotated = false;
+        rotated_today = false;
     }
 
-    if (hour == 0 && !rotated_today) {
+    if (hour == 23 && rotated_today == false) {
         console.log('rotating dictator')
-        rotate_dictator();
         rotated_today = true;
+        rotate_dictator();
     }
 
 }, min);
