@@ -368,18 +368,18 @@ Bot.on('message', message => {
 
         if(CMD_NAME == "commands"){
             const commands = `
-                !commands,
-                !overthrow (all people need to vote to overthrow),
-                !get [dictator,...],
-                !remove_user (owner ONLY),
-                !rotate (owner ONLY),
-                !dictator (join the dictator pool),
-                !play (play tic tac toe),
+                !commands
+                !overthrow (all people need to vote to overthrow)
+                !get [dictator,...]
+                !remove_user (owner ONLY)
+                !rotate (owner ONLY)
+                !dictator (join the dictator pool)
+                !play (play tic tac toe)
                 !leave (leave tic tac toe)
             `
 
             const embed = new MessageEmbed()
-            .setTitle('All Possible Dictators')
+            .setTitle('All Commands')
             .setColor('#2a80f7')
             .setDescription(commands)
 
