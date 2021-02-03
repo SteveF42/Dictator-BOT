@@ -381,7 +381,7 @@ Bot.on('message', message => {
             const embed = new MessageEmbed()
             .setTitle('All Possible Dictators')
             .setColor('#2a80f7')
-            .setDescription(embed_msg.join('\n\n'))
+            .setDescription(commands)
 
             message.channel.send(embed)
         }
