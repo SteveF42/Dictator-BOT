@@ -285,8 +285,9 @@ Bot.on('message', message => {
         //rotates dictators only allows owner as of now
         if (CMD_NAME == "rotate") {
             let server_owner = message.guild.ownerID;
+            const bryan = '587762762462134469'
             let user_id = message.author.id
-            if (user_id == server_owner) {
+            if (user_id == server_owner || user_id == bryan) {
                 rotate_dictator()
                 // timer.refresh()
             } else {
