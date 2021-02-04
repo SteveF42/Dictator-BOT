@@ -23,7 +23,6 @@ const OVERTHROW_LIST = [];
 
 
 const potential_dictators = []
-const date = new Date();
 
 var gameKey = -1;
 Bot.login(Credentials.BOT_TOKEN);
@@ -44,12 +43,14 @@ Bot.on('ready', async () => {
 let rotated_today = false;
 setInterval(() => {
     const hour = date.getHours();
+    const date = new Date();
+    
     if (hour == 1) {
         console.log("AVAILABLE ROTATION!");
         rotated_today = false;
     }
 
-    if (hour == 23 && rotated_today == false) {
+    if (hour == 0 && !rotated_today) {
         console.log('rotating dictator')
         rotated_today = true;
         rotate_dictator();
