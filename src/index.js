@@ -389,7 +389,7 @@ Bot.on('message', message => {
             message.channel.send(embed)
         }
 
-        if(CMD_NAME == '!steve'){
+        if(CMD_NAME == 'steve'){
             message.channel.send('https://www.youtube.com/watch?v=v7szH6ZWKkg')
         }
 
