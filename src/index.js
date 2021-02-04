@@ -131,7 +131,9 @@ async function rotate_dictator() {
 
     }
 
-
+    //reset the overthrow list/counter
+    OVERTHROW_COUNTER = 0;
+    OVERTHROW_LIST = []
 }
 
 function read_file() {
@@ -358,7 +360,7 @@ Bot.on('message', message => {
                 message.reply("You can't vote more than once!")
             }
 
-            if(OVERTHROW_COUNTER === potential_dictators.length){
+            if(OVERTHROW_COUNTER === potential_dictators.length-1){
                 rotate_dictator();
                 message.channel.send('THE CURRENT DICTATOR HAS BEEN OVER THROWN!');
                 OVERTHROW_COUNTER = 0;
@@ -384,6 +386,10 @@ Bot.on('message', message => {
             .setDescription(commands)
 
             message.channel.send(embed)
+        }
+
+        if(CMD_NAME == '!steve'){
+            message.channel.send('https://www.youtube.com/watch?v=v7szH6ZWKkg')
         }
 
         //checks if someone requested a game and that game is in play
