@@ -39,11 +39,13 @@ Bot.on('ready', async () => {
     console.log(potential_dictators)
 })
 
+Bot.on('debug',console.log)
+
 //every minute it'll check the hour
 let rotated_today = false;
 setInterval(() => {
-    const hour = date.getHours();
     const date = new Date();
+    const hour = date.getHours();
     
     if (hour == 1) {
         console.log("AVAILABLE ROTATION!");
