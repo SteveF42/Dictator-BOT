@@ -1,5 +1,6 @@
 # Discord-BOT
-Useless discord game which allows two people to play Tic-Tac-Toe
+Dictator Bot, randomly gives users who sign up for dictator position all the power in the server
+***side note*** you can also play tic tac toe with this
 <h1>Commands</h1>
 <ul>
   <li>!play - starts a new game putting player 1 into a queue</li>
