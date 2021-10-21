@@ -3,9 +3,6 @@
 const fs = require('fs')
 const path = require('path')
 const FILENAME = "userList.json"
-const user_list = require(FILENAME)
-
-
 
 
 function read_file() {
