@@ -1,5 +1,4 @@
 const { Client, MessageEmbed } = require('discord.js')
-const Credentials = require('../Credentials.json')
 const {JsonDB} = require('node-json-db');
 const {Config} = require('node-json-db/dist/lib/JsonDBConfig')
 

@@ -13,6 +13,8 @@ function execCommand(cmd,message){
     }
 
     if(cmd === 'dictator') dictatorCmds.dictator(message)
+
+    if(cmd === "rotate") dictatorCmds.rotateDictator(message)
 }
 
 

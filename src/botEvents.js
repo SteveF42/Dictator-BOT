@@ -8,7 +8,7 @@ Bot.on('ready', async () => {
     console.log(`${Bot.user.username} has logged in!`);
 })
 
-Bot.on('debug', console.log)
+// Bot.on('debug', console.log)
 
 Bot.on('message', message => {
     if (message.author.bot) return;
