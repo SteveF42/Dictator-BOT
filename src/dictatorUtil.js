@@ -23,24 +23,26 @@ async function deploy(message) {
     const guildID = message.guild.id
     const format = {}
     format[guildID] = {
-        channelID:channelID,
-        users:{}
+        channelID: channelID,
+        dictatorRoll: DICTATOR_ROLE,
+        overthrowList: [],
+        users: {},
     }
 
     const dbInfo = DB.getData("/")
-    if(guildID in dbInfo){
+    if (guildID in dbInfo) {
         message.reply("already deployed in this server")
-    }else{
-        message.reply("Your server is now in dictator rotation!")
-        DB.push("/",format)
+    } else {
+        message.reply("Your server is now in dictator rotation! \nuse !updateRoll to change dictator roll name. Default(Dictator)")
+        DB.push("/", format)
 
         //create dictator roll if it doesnt exist
         const roleExists = message.guild.roles.cache.find(role => role.name === DICTATOR_ROLE)
-        if(roleExists === undefined){
+        if (roleExists === undefined) {
             message.guild.roles.create(DICTATOR_ROLE)
         }
     }
-    
+
 }
 
 function commands(message) {
@@ -49,6 +51,7 @@ function commands(message) {
                 !commands   
                 !dictator (join the dictator pool)
                 !overthrow (all people need to vote to overthrow)
+                !updateRoll (Change the dictator name)
                 !get [dictator,...]
                 !remove_user (owner ONLY)
                 !rotate (owner ONLY)
@@ -72,39 +75,146 @@ function dictator(message) {
     const guildID = message.guild.id
     const userID = message.author.id
     const username = message.author.username
-    try{
+    try {
         const db = DB.getData(`/${guildID}`)
         db.users[username] = userID
-        DB.push(`/${guildID}`,db)
+        DB.push(`/${guildID}`, db)
         message.reply("You have been added to dictator pool!")
-    }catch(e){
+    } catch (e) {
         message.reply("Your server is not in the dictator pool!")
     }
-    
+
 }
 
-function rotateDictator(message){
-    // console.log(Bot.guilds.cache)
-    const dbData = DB.getData("/")
+//helper function which rotates the dictator
+function rotate(serverID, dbData) {
 
-    for(serverID in dbData){
-        const guild = Bot.guilds.cache.get(serverID)
-        const memberList = dbData[serverID].users
-        // const dictators = memberList.filter(memberID =>{
-        //     const guildMember = guild.members.cache.get(memberID)
-        //     return guildMember.roles.cache.find(role => role === DICTATOR_ROLE)
-        // })
-        const dictators = []
-        for(member in memberList){
-            const id = memberList[member]
-            const guildMember = guild.members.cache.get(id)
-            const isDictator = guildMember.roles.cache.find(role => role.name === DICTATOR_ROLE)
-             if(isDictator){
-                dictators.push(guildMember)
-            }
-        }
-        //after getting all people with dictator roll, remove it and give random persin in dictator pool the roll
+
+    const guild = Bot.guilds.cache.get(serverID)
+    const memberList = dbData.users
+    const channelID = dbData.channelID
+    const dictatorName = dbData.dictatorRoll
+    const channel = guild.channels.cache.get(channelID);
+    const dictatorRoleID = guild.roles.cache.find(role => role.name === dictatorName)
+
+    if (dictatorRoleID === undefined) {
+        channel.send("Server does not have a dictator role chosen")
+        console.log("server does not have a dictator role chosen")
+        return;
     }
 
+    // console.log(channels.find(channel => channel.id === channelID))
+    const keys = Object.keys(memberList)
+    if (keys.length <= 1) {
+        channel.send("No other people to rotate with")
+        console.log("No other dictators to rotate out with")
+        return;
+    }
+
+
+    const pastDictators = []
+    const users = []
+    for (member in memberList) {
+        // goes through each server to rotate dictators
+        // gets members from server that are saved in the db and checks if they have dictator role
+        const id = memberList[member]
+        const guildMember = guild.members.cache.get(id)
+        const isDictator = guildMember.roles.cache.find(role => role.name === dictatorName)
+
+        if (isDictator) {
+            guildMember.roles.remove(dictatorRoleID)
+            pastDictators.push(guildMember)
+        }
+        users.push(guildMember)
+    }
+    //after getting all people with dictator roll, remove it and give random persin in dictator pool the roll
+    if (pastDictators.length === 0) {
+        //just choses the first person in the database to be dictator if one doesnt exist
+        console.log("No existing dictators")
+        users[0].roles.add(dictatorRoleID)
+        return
+    }
+    while (true) {
+        let randNum = Math.floor(Math.random() * users.length);
+        const newDictator = users[randNum]
+        if (newDictator.id !== pastDictators[0].id) {
+            users[randNum].roles.add(dictatorRoleID)
+            break;
+        }
+    }
 }
-module.exports = { deploy, commands, dictator, rotateDictator}
+
+//rotates dictators for ALL servers in db
+function rotateDictator() {
+    // console.log(Bot.guilds.cache)
+    getDB('/', (dbData) => {
+        for (serverID in dbData) {
+            rotate(dbData[serverID])
+        }
+    })
+
+
+}
+
+function rotateServer(message) {
+    const guildOwner = message.guild.ownerID;
+    const sender = message.author.id
+    if (guildOwner !== sender) {
+        message.reply("Only the server owner can manually rotate!")
+        return
+    }
+
+    getDB(`/${message.guild.id}`,(db,e)=>{
+        if(e){
+            message.reply("Your server has not deployed Dictator bot")
+            return;
+        }
+        rotate(message.guild.id,db)
+    })
+}
+
+function overthrow(message) {
+    getDB(`/${message.guild.id}`, (db, e) => {
+        console.log(db)
+        if (e) {
+            message.reply("Server not in dictator pool")
+            return
+        }
+
+        if(db.overthrowList.find(usr=>usr === message.author.id)){
+            message.reply("You can not vote more than once!")
+        }else{
+            //pushes user onto the overthrow list
+            //if enough users voted then it rotates and empties the list
+            //update the list at the end
+            db.overthrowList.push(message.author.id)
+            const keys = Object.keys(db.users)
+            message.reply(`${db.overthrowList.length}/${keys.length} needed to overthrow`)
+
+            if(db.overthrowList.length >= keys.length){
+                rotate(message.guild.id,db)
+                db.overthrowList = []
+            }
+            DB.push(`/${message.guild.id}`,db)
+        }
+
+    })
+}
+
+function updateRollName(message) {
+
+}
+
+
+module.exports = { deploy, commands, dictator, rotateDictator, updateRollName, rotateServer, overthrow }
+
+function getDB(data, cb) {
+    let db = undefined; 
+    try {
+        db = DB.getData(data)
+    } catch (e) {
+        cb(db,e)
+        return
+    }
+    cb(db)
+}
