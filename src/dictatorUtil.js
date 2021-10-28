@@ -125,6 +125,7 @@ function rotate(serverID, dbData) {
         if (isDictator) {
             guildMember.roles.remove(dictatorRoleID)
             pastDictators.push(guildMember)
+            channel.send(`<@${guildMember.id}> has been dethrowned!`)
         }
         users.push(guildMember)
     }
@@ -140,6 +141,7 @@ function rotate(serverID, dbData) {
         const newDictator = users[randNum]
         if (newDictator.id !== pastDictators[0].id) {
             users[randNum].roles.add(dictatorRoleID)
+            channel.send(`<@${newDictator.id}> has been crowned!`)
             break;
         }
     }
