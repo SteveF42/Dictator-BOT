@@ -1,3 +1,4 @@
+const {MessageEmbed} = require('discord.js')
 const { JsonDB } = require("node-json-db");
 const file = require("./writeFile")
 
@@ -48,13 +49,13 @@ async function deploy(message) {
 function commands(message) {
 
     const commands = `
-                !commands   
+                !deploy   
                 !dictator (join the dictator pool)
                 !overthrow (all people need to vote to overthrow)
+                !rotate (owner ONLY)
                 !updateRoll (Change the dictator name)
                 !get [dictator,...]
                 !remove_user (owner ONLY)
-                !rotate (owner ONLY)
                 !play (play tic tac toe)
                 !leave (leave tic tac toe)
             `
@@ -202,7 +203,24 @@ function overthrow(message) {
 }
 
 function updateRollName(message) {
+    const [command, ...other] = message.content.trim().substr(1).split(' ')
+    const newName = other.join(' ') 
+    getDB(`/${message.guild.id}`,(db,e)=>{
+        if(e){
+            console.log('error',e)
+            return
+        }
+        const roll = message.guild.roles.cache.find(role => role.name === db.dictatorRoll)
+        
+        roll.edit({
+            name: newName
+        })
 
+        db.dictatorRoll = newName
+        DB.push(`/${message.guild.id}`,db)
+        message.reply(`Dictator roll name updated to: ${newName}`)
+
+    })
 }
 
 

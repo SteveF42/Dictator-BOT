@@ -1,6 +1,7 @@
 const { Client, MessageEmbed } = require('discord.js')
 const {JsonDB} = require('node-json-db');
 const {Config} = require('node-json-db/dist/lib/JsonDBConfig')
+const {rotateDictator} = require('./dictatorUtil')
 
 const second = 1000
 const min = second * 60
@@ -26,7 +27,7 @@ setInterval(() => {
     if (hour == 0 && !rotated_today) {
         console.log('rotating dictator')
         rotated_today = true;
-        rotate_dictator();
+        rotateDictator()
     }
 
 }, min * 30);
