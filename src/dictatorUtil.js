@@ -150,7 +150,7 @@ function rotateDictator() {
     // console.log(Bot.guilds.cache)
     getDB('/', (dbData) => {
         for (serverID in dbData) {
-            rotate(dbData[serverID])
+            rotate(serverID,dbData[serverID])
         }
     })
 
