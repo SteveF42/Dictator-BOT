@@ -223,8 +223,37 @@ function updateRollName(message) {
     })
 }
 
+function removeUser(message){
+    const [command, ...other] = message.content.trim().substr(1).split(' ')
+    const username = other.join(' ') 
 
-module.exports = { deploy, commands, dictator, rotateDictator, updateRollName, rotateServer, overthrow }
+    if(message.guild.ownerID !== message.author.id){
+        message.reply("Server owner can only remove users")
+        return
+    }
+
+    getDB(`/${message.guild.id}`,(db,e)=>{
+        if(e){
+            console.log(e)
+            return
+        }
+
+        const member = message.guild.members.cache.find(member=> member.nickname === username)
+        if(member !== undefined){
+            const memberName = member.user.username
+            const role = member.roles.cache.find(role => role.name === db.dictatorRoll)
+            
+            if(role !== undefined){
+                rotate(message.guild.id,db)
+            }
+            
+            delete db.users[memberName]
+            DB.push(`/${message.guild.id}`,db)
+        }
+    })
+}
+
+module.exports = { deploy, commands, dictator, rotateDictator, updateRollName, rotateServer, overthrow, removeUser}
 
 function getDB(data, cb) {
     let db = undefined; 

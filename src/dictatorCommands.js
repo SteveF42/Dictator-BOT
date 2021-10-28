@@ -16,6 +16,9 @@ function execCommand(cmd,message){
     if(cmd === "overthrow") dictatorCmds.overthrow(message)
     if(cmd === "rotate") dictatorCmds.rotateServer(message)
     if(cmd === "updateRoll") dictatorCmds.updateRollName(message)
+    if(cmd === "remove") dictatorCmds.removeUser(message)
+    // add tic tac toe stuff
+    // if(cmd === 'play')
 }
 
 
