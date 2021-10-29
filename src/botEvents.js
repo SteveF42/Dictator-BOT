@@ -16,10 +16,10 @@ Bot.on('message', message => {
     if(message.content.startsWith(prefix)){
 
         const [CMD_NAME, ...other] = message.content
+        .toLowerCase()
         .trim()
         .substr(prefix.length)
         .split(' ')
-        .toLowerCase();
         console.log(CMD_NAME);
         
         dictatorCommands.execCommand(CMD_NAME,message)
