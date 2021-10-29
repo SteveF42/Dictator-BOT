@@ -12,11 +12,15 @@ Bot.on('ready', async () => {
 
 Bot.on('message', message => {
     if (message.author.bot) return;
-    const [CMD_NAME, ...other] = message.content
-            .trim()
-            .substr(prefix.length)
-            .split(' ');
-        console.log(CMD_NAME);
 
-    dictatorCommands.execCommand(CMD_NAME,message)
+    if(message.content.startsWith(prefix)){
+        
+        const [CMD_NAME, ...other] = message.content
+        .trim()
+        .substr(prefix.length)
+        .split(' ');
+        console.log(CMD_NAME);
+        
+        dictatorCommands.execCommand(CMD_NAME,message)
+    }
 })
