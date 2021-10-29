@@ -14,11 +14,12 @@ Bot.on('message', message => {
     if (message.author.bot) return;
 
     if(message.content.startsWith(prefix)){
-        
+
         const [CMD_NAME, ...other] = message.content
         .trim()
         .substr(prefix.length)
-        .split(' ');
+        .split(' ')
+        .toLowerCase();
         console.log(CMD_NAME);
         
         dictatorCommands.execCommand(CMD_NAME,message)
