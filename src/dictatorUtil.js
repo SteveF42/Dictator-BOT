@@ -194,7 +194,7 @@ function overthrow(message) {
             const keys = Object.keys(db.users)
             message.reply(`${db.overthrowList.length}/${keys.length} needed to overthrow`)
 
-            if(db.overthrowList.length >= keys.length){
+            if(db.overthrowList.length >= keys.length-1){
                 rotate(message.guild.id,db)
                 db.overthrowList = []
             }
@@ -221,7 +221,6 @@ function updateRollName(message) {
         db.dictatorRoll = newName
         DB.push(`/${message.guild.id}`,db)
         message.reply(`Dictator roll name updated to: ${newName}`)
-
     })
 }
 
