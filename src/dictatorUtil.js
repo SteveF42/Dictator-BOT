@@ -132,7 +132,7 @@ function rotate(serverID, dbData) {
             guildMember.roles.remove(dictatorRoleID)
             pastDictators++
             console.log(`<@${guildMember.id}> has been dethrowned!`)
-            // channel.send(`<${guildMember.id}> has been dethrowned!`)
+            channel.send(`<@${guildMember.id}> has been dethrowned!`)
         } else {
             potentialDictators.push(guildMember)
         }
@@ -142,7 +142,7 @@ function rotate(serverID, dbData) {
         //just choses the first person in the database to be dictator if one doesnt exist
         console.log("No existing dictators")
         console.log(`<@${potentialDictators[0].id}> has been crowned!`)
-        // channel.send(`<${users[0]}> has been crowned!`)
+        channel.send(`<@${potentialDictators[0].id}> has been crowned!`)
         potentialDictators[0].roles.add(dictatorRoleID)
         return
     }
@@ -152,7 +152,7 @@ function rotate(serverID, dbData) {
     const newDictator = potentialDictators[randNum]
     newDictator.roles.add(dictatorRoleID)
     console.log(`<@${newDictator.id}> has been crowned!`)
-    // channel.send(`<${newDictator.id}> has been crowned!`)
+    channel.send(`<@${newDictator.id}> has been crowned!`)
     // when a rotate happens clear the overthrow list
     dbData.overthrowList = []
     DB.push(`/${serverID}`, dbData)
