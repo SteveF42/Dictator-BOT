@@ -1,4 +1,4 @@
-const {MessageEmbed} = require('discord.js')
+const { MessageEmbed } = require('discord.js')
 const { JsonDB } = require("node-json-db");
 const file = require("./writeFile")
 
@@ -78,10 +78,16 @@ function dictator(message) {
     const username = message.author.username
     try {
         const db = DB.getData(`/${guildID}`)
-        db.users[username] = userID
+
+        if (userID in db.users) {
+            message.reply('you\'re already in the dictator pool!')
+            return
+        }
+        db.users[userID] = username
         DB.push(`/${guildID}`, db)
         message.reply("You have been added to dictator pool!")
     } catch (e) {
+        console.log(e)
         message.reply("Your server is not in the dictator pool!")
     }
 
@@ -113,38 +119,43 @@ function rotate(serverID, dbData) {
     }
 
 
-    const pastDictators = []
-    const users = []
-    for (member in memberList) {
+    const potentialDictators = []
+    let pastDictators = 0
+    for (id in memberList) {
         // goes through each server to rotate dictators
         // gets members from server that are saved in the db and checks if they have dictator role
-        const id = memberList[member]
         const guildMember = guild.members.cache.get(id)
         const isDictator = guildMember.roles.cache.find(role => role.name === dictatorName)
 
+
         if (isDictator) {
             guildMember.roles.remove(dictatorRoleID)
-            pastDictators.push(guildMember)
-            channel.send(`<@${guildMember.id}> has been dethrowned!`)
+            pastDictators++
+            console.log(`<${guildMember.id}> has been dethrowned!`)
+            // channel.send(`<${guildMember.id}> has been dethrowned!`)
+        } else {
+            potentialDictators.push(guildMember)
         }
-        users.push(guildMember)
     }
     //after getting all people with dictator roll, remove it and give random persin in dictator pool the roll
-    if (pastDictators.length === 0) {
+    if (pastDictators === 0) {
         //just choses the first person in the database to be dictator if one doesnt exist
         console.log("No existing dictators")
-        users[0].roles.add(dictatorRoleID)
+        console.log(`<@${potentialDictators[0]}> has been crowned!`)
+        // channel.send(`<${users[0]}> has been crowned!`)
+        potentialDictators[0].roles.add(dictatorRoleID)
         return
     }
-    while (true) {
-        let randNum = Math.floor(Math.random() * users.length);
-        const newDictator = users[randNum]
-        if (newDictator.id !== pastDictators[0].id) {
-            users[randNum].roles.add(dictatorRoleID)
-            channel.send(`<@${newDictator.id}> has been crowned!`)
-            break;
-        }
-    }
+
+    //picks a random user from potentialDictator list
+    let randNum = Math.floor(Math.random() * potentialDictators.length);
+    const newDictator = potentialDictators[randNum]
+    newDictator.roles.add(dictatorRoleID)
+    console.log(`<${newDictator.id}> has been crowned!`)
+    // channel.send(`<${newDictator.id}> has been crowned!`)
+    // when a rotate happens clear the overthrow list
+    dbData.overthrowList = []
+    DB.push(`/${serverID}`, dbData)
 }
 
 //rotates dictators for ALL servers in db
@@ -152,7 +163,7 @@ function rotateDictator() {
     // console.log(Bot.guilds.cache)
     getDB('/', (dbData) => {
         for (serverID in dbData) {
-            rotate(serverID,dbData[serverID])
+            rotate(serverID, dbData[serverID])
         }
     })
 
@@ -167,12 +178,12 @@ function rotateServer(message) {
         return
     }
 
-    getDB(`/${message.guild.id}`,(db,e)=>{
-        if(e){
+    getDB(`/${message.guild.id}`, (db, e) => {
+        if (e) {
             message.reply("Your server has not deployed Dictator bot")
             return;
         }
-        rotate(message.guild.id,db)
+        rotate(message.guild.id, db)
     })
 }
 
@@ -184,9 +195,9 @@ function overthrow(message) {
             return
         }
 
-        if(db.overthrowList.find(usr=>usr === message.author.id)){
+        if (db.overthrowList.find(usr => usr === message.author.id)) {
             message.reply("You can not vote more than once!")
-        }else{
+        } else {
             //pushes user onto the overthrow list
             //if enough users voted then it rotates and empties the list
             //update the list at the end
@@ -194,11 +205,11 @@ function overthrow(message) {
             const keys = Object.keys(db.users)
             message.reply(`${db.overthrowList.length}/${keys.length} needed to overthrow`)
 
-            if(db.overthrowList.length >= keys.length-1){
-                rotate(message.guild.id,db)
+            if (db.overthrowList.length >= keys.length - 1) {
+                rotate(message.guild.id, db)
                 db.overthrowList = []
             }
-            DB.push(`/${message.guild.id}`,db)
+            DB.push(`/${message.guild.id}`, db)
         }
 
     })
@@ -206,62 +217,78 @@ function overthrow(message) {
 
 function updateRollName(message) {
     const [command, ...other] = message.content.trim().substr(1).split(' ')
-    const newName = other.join(' ') 
-    getDB(`/${message.guild.id}`,(db,e)=>{
-        if(e){
-            console.log('error',e)
+    const newName = other.join(' ')
+    getDB(`/${message.guild.id}`, (db, e) => {
+        if (e) {
+            console.log('error', e)
             return
         }
         const roll = message.guild.roles.cache.find(role => role.name === db.dictatorRoll)
-        
+
         roll.edit({
             name: newName
         })
 
         db.dictatorRoll = newName
-        DB.push(`/${message.guild.id}`,db)
+        DB.push(`/${message.guild.id}`, db)
         message.reply(`Dictator roll name updated to: ${newName}`)
     })
 }
 
-function removeUser(message){
+function removeUser(message) {
     const [command, ...other] = message.content.trim().substr(1).split(' ')
-    const username = other.join(' ') 
+    const username = other.join(' ')
 
-    if(message.guild.ownerID !== message.author.id){
+    if (message.guild.ownerID !== message.author.id) {
         message.reply("Server owner can only remove users")
         return
     }
 
-    getDB(`/${message.guild.id}`,(db,e)=>{
-        if(e){
+    getDB(`/${message.guild.id}`, (db, e) => {
+        if (e) {
             console.log(e)
             return
         }
 
-        const member = message.guild.members.cache.find(member=> member.nickname === username)
-        if(member !== undefined){
+        const member = message.guild.members.cache.find(member => member.nickname === username)
+        if (member !== undefined) {
             const memberName = member.user.username
             const role = member.roles.cache.find(role => role.name === db.dictatorRoll)
-            
-            if(role !== undefined){
-                rotate(message.guild.id,db)
+
+            if (role !== undefined) {
+                rotate(message.guild.id, db)
             }
-            
+
             delete db.users[memberName]
-            DB.push(`/${message.guild.id}`,db)
+            DB.push(`/${message.guild.id}`, db)
         }
     })
 }
 
-module.exports = { deploy, commands, dictator, rotateDictator, updateRollName, rotateServer, overthrow, removeUser}
+function getDictaorList(message) {
+    const guildID = message.guild.id
+    getDB(`/${guildID}`, (db, e) => {
+        if (e) return;
+        const dictatrList = db.users
+        const dictatorNames = Object.values(dictatrList)
+        const embed = new MessageEmbed()
+            .setTitle('All potential dictators!')
+            .setColor('#2a80f7')
+        dictatorNames.forEach(i=>{
+            embed.addField(i,"\u200B")
+        })
+        message.channel.send(embed)
+    })
+}
+
+module.exports = { deploy, commands, dictator, rotateDictator, updateRollName, rotateServer, overthrow, removeUser, getDictaorList }
 
 function getDB(data, cb) {
-    let db = undefined; 
+    let db = undefined;
     try {
         db = DB.getData(data)
     } catch (e) {
-        cb(db,e)
+        cb(db, e)
         return
     }
     cb(db)
