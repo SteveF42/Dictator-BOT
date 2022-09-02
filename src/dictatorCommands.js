@@ -15,7 +15,7 @@ function execCommand(cmd,message){
     if(cmd === 'dictator') dictatorCmds.dictator(message)
     if(cmd === "overthrow") dictatorCmds.overthrow(message)
     if(cmd === "rotate") dictatorCmds.rotateServer(message)
-    if(cmd === "updateRoll") dictatorCmds.updateRollName(message)
+    if(cmd === "updateroll") dictatorCmds.updateRollName(message)
     if(cmd === "remove") dictatorCmds.removeUser(message)
     if(cmd === 'get') dictatorCmds.getDictaorList(message)
     // add tic tac toe stuff

@@ -104,6 +104,12 @@ function rotate(serverID, dbData) {
     const channel = guild.channels.cache.get(channelID);
     const dictatorRoleID = guild.roles.cache.find(role => role.name === dictatorName)
 
+    //make a function that checks if the channel still has a dictatoor chat
+    //if not create a new chat called dictator and change send warning message
+    // that the old dictator channel was probably deleted and to not do that lmao
+    
+
+
     if (dictatorRoleID === undefined) {
         channel.send("Server does not have a dictator role chosen")
         console.log("server does not have a dictator role chosen")
