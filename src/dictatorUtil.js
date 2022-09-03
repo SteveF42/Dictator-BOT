@@ -243,7 +243,9 @@ function updateRollName(message) {
 
 function removeUser(message) {
     const [command, ...other] = message.content.trim().substr(1).split(' ')
-    const username = other.join(' ')
+    const userInfo = other.join(' ')
+    const userID = userInfo.slice(2,userInfo.length-1)
+    console.log(userID)
 
     if (message.guild.ownerID !== message.author.id) {
         message.reply("Server owner can only remove users")
@@ -256,16 +258,15 @@ function removeUser(message) {
             return
         }
 
-        const member = message.guild.members.cache.find(member => member.nickname === username)
+        const member = message.guild.members.cache.find(member => member.id === userID)
         if (member !== undefined) {
-            const memberName = member.user.username
             const role = member.roles.cache.find(role => role.name === db.dictatorRoll)
 
             if (role !== undefined) {
                 rotate(message.guild.id, db)
             }
 
-            delete db.users[memberName]
+            delete db.users[userID]
             DB.push(`/${message.guild.id}`, db)
         }
     })
