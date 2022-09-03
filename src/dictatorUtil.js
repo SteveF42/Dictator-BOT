@@ -55,7 +55,7 @@ function commands(message) {
                 !rotate (owner ONLY)
                 !updateRoll (Change the dictator name)
                 !get [dictator,...]
-                !remove_user (owner ONLY)
+                !remove @user(owner ONLY)
                 !play (play tic tac toe)
                 !leave (leave tic tac toe)
             `
