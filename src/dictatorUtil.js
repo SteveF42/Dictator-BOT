@@ -1,4 +1,4 @@
-const { MessageEmbed } = require('discord.js')
+const { MessageEmbed, Permissions } = require('discord.js')
 const { JsonDB } = require("node-json-db");
 const file = require("./writeFile")
 
@@ -34,14 +34,17 @@ async function deploy(message) {
     if (guildID in dbInfo) {
         message.reply("already deployed in this server")
     } else {
-        message.reply("Your server is now in dictator rotation! \nuse !updateRoll to change dictator roll name. Default(Dictator)")
-        DB.push("/", format)
-
-        //create dictator roll if it doesnt exist
-        const roleExists = message.guild.roles.cache.find(role => role.name === DICTATOR_ROLE)
-        if (roleExists === undefined) {
-            message.guild.roles.create(DICTATOR_ROLE)
-        }
+        //create dictator roll if it doesnt exist adds ADMINISTRATOR priveleges
+        message.guild.roles.create({
+            data: {
+                name: DICTATOR_ROLE,
+                permissions: ["ADMINISTRATOR"],
+                color: 'BLUE'
+            }
+        }).then(() => {
+            message.reply("Your server is now in dictator rotation! \nuse !updateRoll to change dictator roll name. Default(Dictator)")
+            DB.push("/", format)
+        }).catch(e => console.log(e))
     }
 
 }
@@ -107,7 +110,7 @@ function rotate(serverID, dbData) {
     //make a function that checks if the channel still has a dictatoor chat
     //if not create a new chat called dictator and change send warning message
     // that the old dictator channel was probably deleted and to not do that lmao
-    
+
 
 
     if (dictatorRoleID === undefined) {
@@ -244,7 +247,7 @@ function updateRollName(message) {
 function removeUser(message) {
     const [command, ...other] = message.content.trim().substr(1).split(' ')
     const userInfo = other.join(' ')
-    const userID = userInfo.slice(2,userInfo.length-1)
+    const userID = userInfo.slice(2, userInfo.length - 1)
     console.log(userID)
 
     if (message.guild.ownerID !== message.author.id) {
@@ -281,8 +284,8 @@ function getDictaorList(message) {
         const embed = new MessageEmbed()
             .setTitle('All potential dictators!')
             .setColor('#2a80f7')
-        dictatorNames.forEach(i=>{
-            embed.addField(i,"\u200B")
+        dictatorNames.forEach(i => {
+            embed.addField(i, "\u200B")
         })
         message.channel.send(embed)
     })
