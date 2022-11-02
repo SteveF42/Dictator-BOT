@@ -44,7 +44,10 @@ async function deploy(message) {
         }).then(() => {
             message.reply("Your server is now in dictator rotation! \nuse !updateRoll to change dictator roll name. Default(Dictator)")
             DB.push("/", format)
-        }).catch(e => console.log(e))
+        }).catch(e => {
+            console.log(e)
+            message.channel.send('[INTERNAL ERROR] ' + e)
+        })
     }
 
 }
@@ -130,52 +133,64 @@ function rotate(serverID, dbData) {
 
     const potentialDictators = []
     let pastDictators = 0
-    for (id in memberList) {
-        // goes through each server to rotate dictators
-        // gets members from server that are saved in the db and checks if they have dictator role
-        const guildMember = guild.members.cache.get(id)
-        const isDictator = guildMember.roles.cache.find(role => role.name === dictatorName)
+    try {
+
+        for (id in memberList) {
+            // goes through each server to rotate dictators
+            // gets members from server that are saved in the db and checks if they have dictator role
+            const guildMember = guild.members.cache.get(id)
+            const isDictator = guildMember.roles.cache.find(role => role.name === dictatorName)
 
 
-        if (isDictator) {
-            guildMember.roles.remove(dictatorRoleID)
-            pastDictators++
-            console.log(`<@${guildMember.id}> has been dethrowned!`)
-            channel.send(`<@${guildMember.id}> has been dethrowned!`)
-        } else {
-            potentialDictators.push(guildMember)
+            if (isDictator) {
+                guildMember.roles.remove(dictatorRoleID)
+                pastDictators++
+                console.log(`<@${guildMember.id}> has been dethrowned!`)
+                channel.send(`<@${guildMember.id}> has been dethrowned!`)
+            } else {
+                potentialDictators.push(guildMember)
+            }
         }
-    }
-    //after getting all people with dictator roll, remove it and give random persin in dictator pool the roll
-    if (pastDictators === 0) {
-        //just choses the first person in the database to be dictator if one doesnt exist
-        console.log("No existing dictators")
-        console.log(`<@${potentialDictators[0].id}> has been crowned!`)
-        channel.send(`<@${potentialDictators[0].id}> has been crowned!`)
-        potentialDictators[0].roles.add(dictatorRoleID)
-        return
-    }
+        //after getting all people with dictator roll, remove it and give random persin in dictator pool the roll
+        if (pastDictators === 0) {
+            //just choses the first person in the database to be dictator if one doesnt exist
+            console.log("No existing dictators")
+            console.log(`<@${potentialDictators[0].id}> has been crowned!`)
+            channel.send(`<@${potentialDictators[0].id}> has been crowned!`)
+            potentialDictators[0].roles.add(dictatorRoleID)
+            return
+        }
 
-    //picks a random user from potentialDictator list
-    let randNum = Math.floor(Math.random() * potentialDictators.length);
-    const newDictator = potentialDictators[randNum]
-    newDictator.roles.add(dictatorRoleID)
-    console.log(`<@${newDictator.id}> has been crowned!`)
-    channel.send(`<@${newDictator.id}> has been crowned!`)
-    // when a rotate happens clear the overthrow list
-    dbData.overthrowList = []
-    DB.push(`/${serverID}`, dbData)
+        //picks a random user from potentialDictator list
+        let randNum = Math.floor(Math.random() * potentialDictators.length);
+        const newDictator = potentialDictators[randNum]
+        newDictator.roles.add(dictatorRoleID)
+        console.log(`<@${newDictator.id}> has been crowned!`)
+        channel.send(`<@${newDictator.id}> has been crowned!`)
+        // when a rotate happens clear the overthrow list
+        dbData.overthrowList = []
+        DB.push(`/${serverID}`, dbData)
+    } catch (err) {
+        console.log(err)
+        channel.send('[INTERNAL ERROR] ' + err)
+    }
 }
 
 //rotates dictators for ALL servers in db
 function rotateDictator() {
     // console.log(Bot.guilds.cache)
-    getDB('/', (dbData) => {
-        for (serverID in dbData) {
-            rotate(serverID, dbData[serverID])
-        }
-    })
 
+    try {
+
+        getDB('/', (dbData) => {
+            for (serverID in dbData) {
+                rotate(serverID, dbData[serverID])
+            }
+        })
+
+    }catch(err){
+        console.log(err)
+    }
 
 }
 
@@ -212,7 +227,7 @@ function overthrow(message) {
             //update the list at the end
             db.overthrowList.push(message.author.id)
             const keys = Object.keys(db.users)
-            message.reply(`${db.overthrowList.length}/${keys.length} needed to overthrow`)
+            message.reply(`${db.overthrowList.length}/${keys.length - 1} needed to overthrow`)
 
             if (db.overthrowList.length >= keys.length - 1) {
                 rotate(message.guild.id, db)
@@ -230,6 +245,7 @@ function updateRollName(message) {
     getDB(`/${message.guild.id}`, (db, e) => {
         if (e) {
             console.log('error', e)
+            message.channel.send('[INTERNAL ERROR] ' + e)
             return
         }
         const roll = message.guild.roles.cache.find(role => role.name === db.dictatorRoll)
@@ -258,6 +274,7 @@ function removeUser(message) {
     getDB(`/${message.guild.id}`, (db, e) => {
         if (e) {
             console.log(e)
+            message.channel.send('[INTERNAL ERROR] ' + e)
             return
         }
 
