@@ -61,6 +61,9 @@ function leaveGame(userID, message, bot) {
         delete games[gameID]
         gameKey--;
     }
+    else{
+        message.reply('YOU\'RE NOT IN A GAME BOZO')
+    }
 
 }
 
