@@ -67,7 +67,8 @@ function leaveGame(userID, message, bot) {
 
 }
 
-function makeMove(Bot) {
+function makeMove(message,CMD_NAME,Bot) {
+    const authorID = message.author.id
 
     if (authorID in players && games[players[authorID]].GameInPlay()) {
         let num_choice = parseInt(CMD_NAME)

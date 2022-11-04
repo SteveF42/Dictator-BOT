@@ -17,41 +17,6 @@ const COMMANDS = [
 const DICTATOR_ROLE = "Dictator"
 
 
-async function deploy(message) {
-    //when deployed into server, grab guildID and channelID so bot knows what channel to reply to
-    console.log(message.channel.id)
-    const channelID = message.channel.id;
-    const guildID = message.guild.id
-    const format = {}
-    format[guildID] = {
-        channelID: channelID,
-        dictatorRoll: DICTATOR_ROLE,
-        overthrowList: [],
-        users: {},
-    }
-
-    const dbInfo = DB.getData("/")
-    if (guildID in dbInfo) {
-        message.reply("already deployed in this server")
-    } else {
-        //create dictator roll if it doesnt exist adds ADMINISTRATOR priveleges
-        message.guild.roles.create({
-            data: {
-                name: DICTATOR_ROLE,
-                permissions: ["ADMINISTRATOR"],
-                color: 'BLUE'
-            }
-        }).then(() => {
-            message.reply("Your server is now in dictator rotation! \nuse !updateRoll to change dictator roll name. Default(Dictator)")
-            DB.push("/", format)
-        }).catch(e => {
-            console.log(e)
-            message.channel.send('[INTERNAL ERROR] ' + e)
-        })
-    }
-
-}
-
 function commands(message) {
 
     const commands = `
@@ -72,6 +37,42 @@ function commands(message) {
         .setDescription(commands)
 
     message.channel.send(embed)
+
+}
+
+async function deploy(message) {
+    //when deployed into server, grab guildID and channelID so bot knows what channel to reply to
+    console.log(message.channel.id)
+    const channelID = message.channel.id;
+    const guildID = message.guild.id
+    const guildDetails = {
+        channelID: channelID,
+        dictatorRoll: DICTATOR_ROLE,
+        overthrowList: [],
+        users: {},
+    }
+
+    const dbInfo = DB.getData("/")
+    if (guildID in dbInfo) {
+        message.reply("already deployed in this server")
+    } else {
+        //create dictator roll if it doesnt exist adds ADMINISTRATOR priveleges
+        message.guild.roles.create({
+            data: {
+                name: DICTATOR_ROLE,
+                permissions: ["ADMINISTRATOR"],
+                color: 'BLUE'
+            }
+        }).then(roll => {
+            message.reply("Your server is now in dictator rotation! \nuse !updateRoll to change dictator roll name. Default(Dictator)")
+            guildDetails.dictatorRoll = roll.id
+            dbInfo[guildID] = guildDetails
+            DB.push("/", dbInfo)
+        }).catch(e => {
+            console.log(e)
+            message.channel.send('[INTERNAL ERROR] ' + e)
+        })
+    }
 
 }
 
@@ -106,25 +107,25 @@ function rotate(serverID, dbData) {
     const guild = Bot.guilds.cache.get(serverID)
     const memberList = dbData.users
     const channelID = dbData.channelID
-    const dictatorName = dbData.dictatorRoll
+    const dictatorID = dbData.dictatorRoll
     const channel = guild.channels.cache.get(channelID);
-    const dictatorRoleID = guild.roles.cache.find(role => role.name === dictatorName)
+    const discordRollObj = guild.roles.cache.find(role => role.id === dictatorID)
 
     //make a function that checks if the channel still has a dictatoor chat
     //if not create a new chat called dictator and change send warning message
     // that the old dictator channel was probably deleted and to not do that lmao
 
 
-
-    if (dictatorRoleID === undefined) {
+    if (discordRollObj === undefined) {
         channel.send("Server does not have a dictator role chosen")
         console.log("server does not have a dictator role chosen")
+        createDictatorRoll(guild)
         return;
     }
 
     // console.log(channels.find(channel => channel.id === channelID))
     const keys = Object.keys(memberList)
-    if (keys.length <= 1) {
+    if (keys.length === 0) {
         channel.send("No other people to rotate with")
         console.log("No other dictators to rotate out with")
         return;
@@ -139,11 +140,11 @@ function rotate(serverID, dbData) {
             // goes through each server to rotate dictators
             // gets members from server that are saved in the db and checks if they have dictator role
             const guildMember = guild.members.cache.get(id)
-            const isDictator = guildMember.roles.cache.find(role => role.name === dictatorName)
+            const isDictator = guildMember.roles.cache.find(role => role.id === dictatorID)
 
 
             if (isDictator) {
-                guildMember.roles.remove(dictatorRoleID)
+                guildMember.roles.remove(discordRollObj)
                 pastDictators++
                 console.log(`<@${guildMember.id}> has been dethrowned!`)
                 channel.send(`<@${guildMember.id}> has been dethrowned!`)
@@ -152,19 +153,19 @@ function rotate(serverID, dbData) {
             }
         }
         //after getting all people with dictator roll, remove it and give random persin in dictator pool the roll
-        if (pastDictators === 0) {
+        if (pastDictators == 0) {
             //just choses the first person in the database to be dictator if one doesnt exist
             console.log("No existing dictators")
             console.log(`<@${potentialDictators[0].id}> has been crowned!`)
             channel.send(`<@${potentialDictators[0].id}> has been crowned!`)
-            potentialDictators[0].roles.add(dictatorRoleID)
+            potentialDictators[0].roles.add(discordRollObj)
             return
         }
 
         //picks a random user from potentialDictator list
         let randNum = Math.floor(Math.random() * potentialDictators.length);
         const newDictator = potentialDictators[randNum]
-        newDictator.roles.add(dictatorRoleID)
+        newDictator.roles.add(discordRollObj)
         console.log(`<@${newDictator.id}> has been crowned!`)
         channel.send(`<@${newDictator.id}> has been crowned!`)
         // when a rotate happens clear the overthrow list
@@ -188,7 +189,7 @@ function rotateDictator() {
             }
         })
 
-    }catch(err){
+    } catch (err) {
         console.log(err)
     }
 
@@ -214,8 +215,12 @@ function rotateServer(message) {
 function overthrow(message) {
     getDB(`/${message.guild.id}`, (db, e) => {
         console.log(db)
+        const authorID = message.author.id
         if (e) {
             message.reply("Server not in dictator pool")
+            return
+        } else if (!authorID in db.users) {
+            message.reply("Type !dictator to be eligable to overthrow")
             return
         }
 
@@ -248,13 +253,17 @@ function updateRollName(message) {
             message.channel.send('[INTERNAL ERROR] ' + e)
             return
         }
-        const roll = message.guild.roles.cache.find(role => role.name === db.dictatorRoll)
+        const roll = message.guild.roles.cache.find(role => role.id === db.dictatorRoll)
 
+        if (roll === undefined) {
+            message.reply('There is no current dictator roll on this server')
+            createDictatorRoll(message.guild)
+            return
+        }
         roll.edit({
             name: newName
         })
 
-        db.dictatorRoll = newName
         DB.push(`/${message.guild.id}`, db)
         message.reply(`Dictator roll name updated to: ${newName}`)
     })
@@ -279,9 +288,10 @@ function removeUser(message) {
         }
 
         const member = message.guild.members.cache.find(member => member.id === userID)
+        // checks if the user exists
         if (member !== undefined) {
-            const role = member.roles.cache.find(role => role.name === db.dictatorRoll)
-
+            const role = member.roles.cache.find(role => role.id === db.dictatorRoll)
+            //if that user has dictator roll rotate
             if (role !== undefined) {
                 rotate(message.guild.id, db)
             }
@@ -305,6 +315,37 @@ function getDictaorList(message) {
             embed.addField(i, "\u200B")
         })
         message.channel.send(embed)
+    })
+}
+
+function createDictatorRoll(guild) {
+    const guildID = guild.id;
+
+    getDB(`/${guildID}`, (db, e) => {
+        if (e) {
+            reply('[INTERNAL ERROR]' + e)
+            return
+        }
+        const channelID = db.channelID
+        const channel = guild.channels.cache.get(channelID)
+
+        //creates a new dictator roll if for some reason the original got deleted
+        guild.roles.create({
+            data: {
+                name: DICTATOR_ROLE,
+                permissions: ["ADMINISTRATOR"],
+                color: 'BLUE'
+            }
+        }).then(roll => {
+            channel.send("New dictator Roll created.")
+            console.log("new dictator roll created")
+            db.dictatorRoll = roll.id
+            DB.push(`/${guildID}`, db)
+        }).catch(e => {
+            console.log(e)
+            channel.send('[INTERNAL ERROR] ' + e)
+        })
+
     })
 }
 

@@ -26,7 +26,7 @@ Bot.on('message', message => {
         //do something to implement tic tac toe again
         if (CMD_NAME === 'play') TTTcommands.insertGame(message.author.id,message.channel,Bot);
         else if (CMD_NAME === 'leave') TTTcommands.leaveGame(message.author.id,message,Bot);
-        else if (regex.test(CMD_NAME)) TTTcommands.makeMove(message.author.id,message.channel,Bot);
+        else if (regex.test(CMD_NAME)) TTTcommands.makeMove(message,CMD_NAME,Bot);
         else {
             // executes the dictator commands
             try {
