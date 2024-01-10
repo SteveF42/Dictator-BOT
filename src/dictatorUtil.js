@@ -11,6 +11,7 @@ const COMMANDS = [
     "dictator",
     "play",
     "leave",
+    "stepDown",
     "deploy" //deploys dictator bot into server reading the 
 ]
 
@@ -29,6 +30,7 @@ function commands(message) {
                 !remove @user(owner ONLY)
                 !play (play tic tac toe)
                 !leave (leave tic tac toe)
+                !stepDown (step down from the thrown)
             `
 
     const embed = new MessageEmbed()
@@ -41,21 +43,20 @@ function commands(message) {
 }
 
 async function deploy(message) {
-    //when deployed into server, grab guildID and channelID so bot knows what channel to reply to
-    console.log(message.channel.id)
-    const channelID = message.channel.id;
     const guildID = message.guild.id
-    const guildDetails = {
-        channelID: channelID,
-        dictatorRoll: DICTATOR_ROLE,
-        overthrowList: [],
-        users: {},
-    }
 
     const dbInfo = DB.getData("/")
     if (guildID in dbInfo) {
         message.reply("already deployed in this server")
     } else {
+        //when deployed into server, create a new text channel
+        const channel = await createDictatorChannel(message.guild);
+        const guildDetails = {
+            channelID: channel.id,
+            dictatorRoll: DICTATOR_ROLE,
+            overthrowList: [],
+            users: {},
+        }
         //create dictator roll if it doesnt exist adds ADMINISTRATOR priveleges
         message.guild.roles.create({
             data: {
@@ -63,8 +64,9 @@ async function deploy(message) {
                 permissions: ["ADMINISTRATOR"],
                 color: 'BLUE'
             }
+            //create dictator channel if one does not already exist
         }).then(roll => {
-            message.reply("Your server is now in dictator rotation! \nuse !updateRoll to change dictator roll name. Default(Dictator)")
+            message.reply("Your server is now in dictator rotation! \nuse !updateRoll to change dictator roll name. Default(Dictator) \nuse !commands to see a list of commands")
             guildDetails.dictatorRoll = roll.id
             dbInfo[guildID] = guildDetails
             DB.push("/", dbInfo)
@@ -73,7 +75,17 @@ async function deploy(message) {
             message.channel.send('[INTERNAL ERROR] ' + e)
         })
     }
-
+}
+function createDictatorChannel(guild) {
+    return guild.channels.create('Dictator-Default', {
+        type: 'text',
+        reason: "no previous channel"
+    }).then(channel => {
+        channel.send('[DICTATOR CHANNEL CREATED ALL ROTATIONS ALONGSIDE SERVER COMMANDS WILL BE USED HERE]')
+        return channel;
+    }).catch(e => {
+        console.log(['INTERNAL ERROR' + e]);
+    })
 }
 
 function dictator(message) {
@@ -101,19 +113,25 @@ function dictator(message) {
 }
 
 //helper function which rotates the dictator
-function rotate(serverID, dbData) {
+async function rotate(serverID, dbData) {
 
 
     const guild = Bot.guilds.cache.get(serverID)
     const memberList = dbData.users
-    const channelID = dbData.channelID
+    let channelID = dbData.channelID
     const dictatorID = dbData.dictatorRoll
-    const channel = guild.channels.cache.get(channelID);
+    let channel = guild.channels.cache.get(channelID);
     const discordRollObj = guild.roles.cache.find(role => role.id === dictatorID)
 
     //make a function that checks if the channel still has a dictatoor chat
     //if not create a new chat called dictator and change send warning message
     // that the old dictator channel was probably deleted and to not do that lmao
+    if (channel === undefined) {
+        //create a new channel
+        channel = await createDictatorChannel(guild);
+        channel.send("previous channel not found. Don't be deleting that shit lmao");
+        dbData.channelID = channel.id;
+    }
 
 
     if (discordRollObj === undefined) {
@@ -125,7 +143,7 @@ function rotate(serverID, dbData) {
 
     // console.log(channels.find(channel => channel.id === channelID))
     const keys = Object.keys(memberList)
-    if (keys.length === 0) {
+    if (keys.length === 0 || keys.length == 1) {
         channel.send("No other people to rotate with")
         console.log("No other dictators to rotate out with")
         return;
@@ -323,7 +341,7 @@ function createDictatorRoll(guild) {
 
     getDB(`/${guildID}`, (db, e) => {
         if (e) {
-            reply('[INTERNAL ERROR]' + e)
+            console.log('[INTERNAL ERROR]' + e)
             return
         }
         const channelID = db.channelID
@@ -349,7 +367,25 @@ function createDictatorRoll(guild) {
     })
 }
 
-module.exports = { deploy, commands, dictator, rotateDictator, updateRollName, rotateServer, overthrow, removeUser, getDictaorList }
+function stepDown(message) {
+    const guildID = message.guild.id;
+    getDB(`/${guildID}`, (db, e) => {
+        if (e) {
+            message.reply('[INTERNAL ERROR]' + e);
+            return;
+        }
+        const dictatorID = db.dictatorRoll;
+        const authorID = message.author.id;
+        const guildMember = message.guild.members.cache.get(authorID);
+        const isDictator = guildMember.roles.cache.find(role => role.id === dictatorID);
+        if (isDictator) {
+            message.reply('You have stepped down from the thrown');
+            rotate(guildID, db)
+        }
+    })
+}
+
+module.exports = { deploy, commands, dictator, rotateDictator, updateRollName, rotateServer, overthrow, removeUser, getDictaorList, stepDown }
 
 function getDB(data, cb) {
     let db = undefined;

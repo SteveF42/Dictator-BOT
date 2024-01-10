@@ -18,6 +18,7 @@ function execCommand(cmd,message){
     if(cmd === "updateroll") dictatorCmds.updateRollName(message)
     if(cmd === "remove") dictatorCmds.removeUser(message)
     if(cmd === 'get') dictatorCmds.getDictaorList(message)
+    if(cmd === 'stepdown') dictatorCmds.stepDown(message)
     // add tic tac toe stuff
     // if(cmd === 'play')
 }
