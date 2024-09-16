@@ -11,9 +11,11 @@
   "author": "Steve Flores",
   "license": "ISC",
   "dependencies": {
-    "nodemon": "^2.0.4"
+    "node-json-db": "^1.4.1",
+    "discord.js": "^12.5.3"
+    
   },
   "devDependencies": {
-    "discord.js": "^12.5.1"
+    "nodemon": "^2.0.4"
   }
 }
